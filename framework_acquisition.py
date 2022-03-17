@@ -4,6 +4,7 @@ HOST = ""
 PORT = 5555
 BUFFER_SIZE = 4096
 
+print("Starting acquisition module...")
 print("Server running", HOST, PORT)
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
