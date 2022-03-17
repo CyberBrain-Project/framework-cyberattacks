@@ -1,6 +1,6 @@
 import socket
 
-HOST = "0.0.0.0"
+HOST = ""
 PORT = 5555
 BUFFER_SIZE = 4096
 
@@ -14,7 +14,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         print(f"Connected by {addr}")
         while True:
             print("1")
-            bytes_read = s.recv(BUFFER_SIZE)
+            bytes_read = conn.recv(BUFFER_SIZE)
             #data = "".join(iter(lambda: conn.recv(1), "\n"))
             print("2")
             if not bytes_read:
