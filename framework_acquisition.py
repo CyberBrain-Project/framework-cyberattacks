@@ -1,6 +1,6 @@
 import socket
 
-HOST = ""
+HOST = "127.0.0.1"
 PORT = 5555
 BUFFER_SIZE = 4096
 
@@ -22,3 +22,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     f.close()
     conn.close()
 s.close()
+
