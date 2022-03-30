@@ -2,8 +2,8 @@ import socket
 import tqdm
 import os
 
-HOST = "127.0.0.1"        # The remote host
-PORT = 5555              # The same port as used by the server
+HOST = "127.0.0.1"
+PORT = 5555
 BUFFER_SIZE = 4096
 
 filename = "example.csv"
