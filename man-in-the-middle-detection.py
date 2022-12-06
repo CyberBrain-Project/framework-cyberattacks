@@ -2,6 +2,9 @@ import psutil
 from scapy.all import *
 from datetime import datetime
 import csv
+import joblib
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 
 
 class Monitor:
@@ -20,6 +23,7 @@ class Monitor:
         self.capturedPacketsSize = 0
         self.last_bytes_sent = 0
         self.last_bytes_rcv = 0
+        self.clf = joblib.load('man-in-the-middle-detection.pkl')
 
     def get_stats(self, file_writer):
         '''
@@ -32,24 +36,21 @@ class Monitor:
         self.n_icmp = 0
         self.n_other = 0
 
-        print('Entra')
         sniffer = AsyncSniffer(iface='Wi-Fi',prn=self.packet_stats)
         sniffer.start()
 
-        print('Hey')
-
         cpu_usage = psutil.cpu_percent(10) #%
-        print(cpu_usage)
+
         cpu_frequency = psutil.cpu_freq().current #MHz
-        print(cpu_frequency)
+     
         ram_usage = self.get_ram_usage()   #MB
-        print(ram_usage)
+    
         ram_pct = self.get_ram_usage_pct() #%
-        print(ram_pct)
+     
         swap_usage = self.get_swap_usage() #MB
-        print(swap_usage)
+   
         swap_total = self.get_total_swap() #MB
-        print(swap_total)
+ 
         swap_pct = psutil.swap_memory().percent
         pids = len(psutil.pids())
         n_sockets = len(psutil.net_connections())
@@ -57,7 +58,6 @@ class Monitor:
 
         print('CPU_pct:',cpu_usage,'Frequency:',cpu_frequency,'RAM Usage:',ram_usage,'RAM_pct:', ram_pct,'Swap Usage:',swap_usage,'Total Swap:',swap_total,'Swap_pct:', swap_pct,'PIDS',pids,
             'NSockets:',n_sockets,"TCP:",self.n_tcp,"UDP:",self.n_udp,"ICMP:",self.n_icmp,"Other:",self.n_other,"Total bytes:",self.capturedPacketsSize,"Bytes-Rcv",bytes_io[0], 'Bytes-Sent', bytes_io[1])
-        print()
 
         sniffer.stop()
 
@@ -79,6 +79,7 @@ class Monitor:
                 bytes_io[1], 
                 datetime.now()]
 
+        self.check_attack(row)
         file_writer.writerow(row)
 
         
@@ -140,6 +141,22 @@ class Monitor:
 
         return [net_in, net_out]
 
+    def check_attack(self, row):
+
+        header = ['CPU-pct','Frequency','RAM Usage','RAM-pct','Swap Usage','Swap-pct','Total Swap','PIDS','NSockets','TCP', 'UDP','ICMP', 'Other', 'Total Bytes', 'Bytes-Rcv', 'Bytes-Sent']
+        row = row[:16]
+
+        row_test = pd.DataFrame([row], columns=header)
+        print(self.clf.predict(row_test)[0])
+
+        if(self.clf.predict(row_test)[0]):
+            print('** Man-in-the-middle attack detected **')
+        else:
+            print('** No attack detected **')
+        print()
+
+        
+
 
 def main():
 
@@ -148,6 +165,8 @@ def main():
 
     file = open(filename, 'w', newline = '')
     file_writer = csv.writer(file)
+
+
     header = ['CPU-pct','Frequency','RAM Usage','RAM-pct','Swap Usage','Swap-pct','Total Swap','PIDS','NSockets','TCP', 'UDP','ICMP', 'Other', 'Total Bytes', 'Bytes-Rcv', 'Bytes-Sent','Timestamp']
     file_writer.writerow(header)
 
