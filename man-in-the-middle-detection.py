@@ -142,6 +142,10 @@ class Monitor:
         return [net_in, net_out]
 
     def check_attack(self, row):
+        '''
+            Gets the row with the statistics monitored and return the prediction of the trained model to determine
+            if there is a attack.
+        '''
 
         header = ['CPU-pct','Frequency','RAM Usage','RAM-pct','Swap Usage','Swap-pct','Total Swap','PIDS','NSockets','TCP', 'UDP','ICMP', 'Other', 'Total Bytes', 'Bytes-Rcv', 'Bytes-Sent']
         row = row[:16]
@@ -150,7 +154,8 @@ class Monitor:
         print(self.clf.predict(row_test)[0])
 
         if(self.clf.predict(row_test)[0]):
-            print('** Man-in-the-middle attack detected **')
+            print('** WARNING: Possible man-in-the-middle attack detected **')
+            print('Highly recommended to stop the experiment, data leakage could occur.')
         else:
             print('** No attack detected **')
         print()
